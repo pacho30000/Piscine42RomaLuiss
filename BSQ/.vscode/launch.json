@@ -30,7 +30,7 @@
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${fileDirname}/${fileBasenameNoExtension}",
-			"args": ["s2.txt", "s3.txt"],
+			"args": ["s4.txt"],
 			"stopAtEntry": false,
 			"cwd": "${fileDirname}",
 			"environment": [],

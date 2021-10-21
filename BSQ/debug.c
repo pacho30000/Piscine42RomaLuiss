@@ -66,7 +66,12 @@ int	first_linee(char *s) // Controlliamo la prima riga e assegniamo i valori all
 	int i;
 
 	i = 0;
-	str = (char*) malloc (50);
+	while (s[i] != '\0')
+		i++;
+	str = (char*) malloc(i + 1);
+	if (str == NULL)
+		return (0);
+	i = 0;
 	fd = open(s, O_RDONLY);
 	while (read(fd, &c, 1) > 0)					// Aggiunto indice j a C, perche da errore.
 	{
@@ -159,6 +164,8 @@ char	**convert_str_to_matr(char *str, int row_num)
 	if (str == NULL)
 		return (NULL);
 	matrix = (char **)malloc(sizeof(char *) * row_num);
+	if (matrix == NULL)
+		exit(-1);
 	while (*str != '\n')
 		str++;
 	str++;
@@ -167,6 +174,8 @@ char	**convert_str_to_matr(char *str, int row_num)
 	while (*str != '\0')
 	{
 		matrix[i] = (char *)malloc(len + 1);
+		if (matrix[i] == NULL)
+			exit(-1);
 		while (*str != '\n')
 		{
 			matrix[i][j] = *str++;
@@ -199,9 +208,13 @@ int	**alloc_int_matrix(char **matrix_char, int row_num)
 	i = 0;
 	size_row = ft_strlen(*matrix_char);
 	matrix_int = (int **)malloc(sizeof(int *) * row_num);
+	if (matrix_int == NULL)
+		exit(-1);
 	while (i < row_num)
 	{
 		*(matrix_int + i) = (int*)malloc(sizeof(int) * size_row);
+		if (*(matrix_int + i) == NULL)
+			exit(-1);
 		i++;
 	}
 	return matrix_int;
@@ -304,6 +317,21 @@ void	write_max_square(char **matr, int **matr_int, int row_num)
 	}
 }
 
+void	free_allocation(char **matr, int **matr_int, int row_num)
+{
+	int	i;
+
+	i = 0;
+	while (i < row_num)
+	{
+		free(matr[i]);
+		free(matr_int[i]);
+		i++;
+	}
+	free(matr_int);
+	free(matr);
+}
+
 int main(int ac, char **ag)
 {
 	if (ac == 1)
@@ -334,7 +362,9 @@ int main(int ac, char **ag)
 			{
 				write (1, "map error\n", 10);
 				if (i + 1 != ac)
-					write (1, "\n", 1);	
+					write (1, "\n", 1);
+				if (i == ac)
+					break;
 				continue;
 			}
 			int **int_matr = alloc_int_matrix(matr, g_c.row_len);
@@ -350,6 +380,7 @@ int main(int ac, char **ag)
 			}
 			if (i + 1 != ac)
 				write (1, "\n", 1);	
+			free_allocation(matr, int_matr, g_c.row_len);
 		}
 	}
 	/*int	i = 0;

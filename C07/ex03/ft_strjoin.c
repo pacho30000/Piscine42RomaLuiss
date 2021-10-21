@@ -1,19 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strdup.c                                        :+:      :+:    :+:   */
+/*   ft_strjoin.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: pcatapan <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/19 09:14:40 by pcatapan          #+#    #+#             */
-/*   Updated: 2021/10/21 13:39:09 by pcatapan         ###   ########.fr       */
+/*   Created: 2021/10/21 13:42:19 by pcatapan          #+#    #+#             */
+/*   Updated: 2021/10/21 13:42:24 by pcatapan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
 #include <unistd.h>
+#include <stdlib.h>
 
-int	str_len(char *str)
+int	ft_strlen(char *str)
 {
 	int	i;
 
@@ -23,18 +23,31 @@ int	str_len(char *str)
 	return (i);
 }
 
-char	*ft_strdup(char *src)
+char	*ft_strjoin(int size, char **strs, char *sep)
 {
-	char	*dst;
-	int		i;
+	char	*tab;
+	int		a;
+	int		b;
+	int		c;
+	int		len;
 
-	dst = (char *)malloc(sizeof(*dst) * (str_len(src) + 1));
-	i = 0;
-	while (src[i] != '\0')
+	a = 0;
+	b = 0;
+	c = 0;
+	len = 1;
+	while (a < size)
+		len = len + ft_strlen(strs[a++]) + ft_strlen(sep);
+	tab = malloc(sizeof(char *) * len);
+	a = -1;
+	while (++a < size)
 	{
-		dst[i] = src[i];
-		i++;
+		while (strs[a][b])
+			tab[c++] = strs[a][b++];
+		b = 0;
+		while (sep[b] && a < size - 1)
+			tab[c++] = sep[b++];
+		b = 0;
 	}
-	dst[i] = '\0';
-	return (dst);
+	tab[c] = '\0';
+	return (tab);
 }
