@@ -1,7 +1,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include <stdio.h>										// da togliere 
+#include <stdio.h>	
+
+#define TEMP_PATH "temp_file"									
 typedef struct s_char_option
 {
 	char	empty;
@@ -58,32 +60,28 @@ int check_first_line (char *s, int i)
 	return (1);		
 }
 
-int	first_linee(char *s) // Controlliamo la prima riga e assegniamo i valori alle vaariabili globali.
+int	first_linee(char *file_str) // Controlliamo la prima riga e assegniamo i valori alle vaariabili globali.
 {
-	int fd;
 	char *str;
-	char c;
 	int i;
 
 	i = 0;
-	while (s[i] != '\0')
+	while (file_str[i] != '\n')
 		i++;
 	str = (char*) malloc(i + 1);
 	if (str == NULL)
 		return (0);
 	i = 0;
-	fd = open(s, O_RDONLY);
-	while (read(fd, &c, 1) > 0)					// Aggiunto indice j a C, perche da errore.
+	while (file_str[i] != '\0')					// Aggiunto indice j a C, perche da errore.
 	{
-		str[i] = c;
-		if ( c == '\n')
+		str[i] = file_str[i];
+		if ( file_str[i] == '\n')
 			break ;
-		if (c < 32 || c == 127)
+		if (file_str[i] < 32 || file_str[i] == 127)
 			return (0);
 		i++;
 	}
 	str[i] = '\0';
-	close(fd);
 	if(check_first_line(str,i) == 0)
 		return (0);
 	return (1);
@@ -99,8 +97,8 @@ int check_linee(char **matr)
 	x = 0;
 	obs = 0;
 	c = ft_strlen(*matr);
-	if (c < 2 || g_c.row_len < 2)
-		return (0);
+	// if (c < 2 || g_c.row_len < 2)
+	// 	return (0);
 	while (x < g_c.row_len)
 	{
 		if (ft_strlen(matr[x]) != c)
@@ -143,6 +141,39 @@ char	*convert_file_to_str(char *path)
 	if (fd < 1)
 		exit(-1);
 	read(fd, str, size);
+	str[size] = '\0';
+	if (str[size - 1] != '\n')
+	{
+		free(str);
+		str = NULL;
+	}
+	return (str);
+}
+
+char	*convert_terminal_to_str()
+{
+	int		size;
+	char	c;
+	char	*str;
+	int		fd;
+
+	size = 0;
+	fd = open(TEMP_PATH, O_RDWR, O_TRUNC, O_CREAT);
+	while (read(0, &c, 1) > 0)
+	{
+		write(1, &c, 1);
+		size++;
+	}
+	str = (char *)malloc(size);
+	if (str == NULL)
+		exit(-1);
+	if (close(fd) == -1)
+		exit(-1);
+	fd = open(TEMP_PATH, O_RDONLY);
+	if (fd < 1)
+		exit(-1);
+	read(fd, str, size);
+	str[size] = '\0'; // Aggiunto da Fede
 	if (str[size - 1] != '\n')
 	{
 		free(str);
@@ -336,8 +367,8 @@ int main(int ac, char **ag)
 {
 	if (ac == 1)
 	{
-		char *str = convert_file_to_str("s.txt");
-		int cond = first_linee("s.txt");
+		char *str = convert_terminal_to_str();
+		int cond = first_linee(str);
 		char **matr = convert_str_to_matr(str, g_c.row_len);
 		if (check_linee(matr) == 0 || cond == 0)
 		{
@@ -347,6 +378,15 @@ int main(int ac, char **ag)
 		int **int_matr = alloc_int_matrix(matr, g_c.row_len);
 		populate_matrix_int(matr, int_matr, g_c.row_len);
 		write_max_square(matr, int_matr, g_c.row_len);
+		int j = 0;
+			// j = 0;
+		while (j < g_c.row_len)
+		{
+			printf("%s", matr[j]);
+			printf("\n");
+			j++;
+		}
+		free_allocation(matr, int_matr, g_c.row_len);
 	}
 	else if (ac > 1)
 	{
@@ -356,15 +396,13 @@ int main(int ac, char **ag)
 		while (i++ < ac)
 		{
 			char *str = convert_file_to_str(ag[i]);
-			int cond = first_linee(ag[i]);
+			int cond = first_linee(str);
 			char **matr = convert_str_to_matr(str, g_c.row_len);
 			if (check_linee(matr) == 0 || cond == 0 || matr == NULL)
 			{
 				write (1, "map error\n", 10);
 				if (i + 1 != ac)
-					write (1, "\n", 1);
-				if (i == ac)
-					break;
+					write (1, "\n", 1);	
 				continue;
 			}
 			int **int_matr = alloc_int_matrix(matr, g_c.row_len);
